@@ -1,8 +1,0 @@
-library ieee;
-use ieee.std_logic_1164.all;
-USE ieee.std_logic_unsigned.all;
-USE ieee.numeric_std.ALL;
-
-entity mux is
-port(clk : in std_logic ;
-reset : in std_logic;
