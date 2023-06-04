@@ -165,7 +165,7 @@ alus: alu port map(readreg1=>readdata11 , re_mux=> re_mux1 , alu_ctr1=>aluct_1 ,
 	
 datame : datamem port map(alu_rlt=>alu_res1 , readreg2=>readdata21 , memwrite1 => memwrite2 , memread1=> memread1 , readdata_d=> readdata_d1);
 
-mux232 : mux32 port map(a=>readdata_d1 , b=>alu_res1 , ch=>memtoregister1 , c=>mux_re);
+mux232 : mux32 port map(a=>alu_res1 , b=>readdata_d1 , ch=>memtoregister1 , c=>mux_re);
 writedatareg1<=mux_re;	
 
 end dataflow;
