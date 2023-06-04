@@ -80,6 +80,13 @@ port(
 pc_cu : in std_logic_vector (31 downto 0);
 pc_ne: out std_logic_vector(31 downto 0));
 end component;
+	
+component addsign is 
+port(
+sign_extd : in std_logic_vector (31 downto 0);
+pc_next1: in std_logic_vector(31 downto 0);
+pc_next2 : out std_logic_vector(31 downto 0));
+end component;
 
 --signals for pc
 signal pc_in1  , pc_out1 : std_logic_vector(31 downto 0);
