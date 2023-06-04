@@ -8,9 +8,9 @@ port(
 sign_extd : in std_logic_vector (31 downto 0);
 pc_next1: in std_logic_vector(31 downto 0);
 pc_next2 : out std_logic_vector(31 downto 0));
-end addpc;
+end addsign;
 
-architecture dtflow of addsign is
+architecture dtflow1 of addsign is
 begin
 pc_next2 <= pc_next1 + sign_extd;
-end dtflow;
+end dtflow1;
