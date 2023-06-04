@@ -105,6 +105,15 @@ signal aluct_1: std_logic_vector(2 downto 0);
 --signals for alu
 signal alu_res1: std_logic_vector(31 downto 0);
 signal re_mux1: std_logic_vector (31 downto 0);
+signal zero1 :std_logic;
+
+--signals for data memory
+signal readdata_d1 : std_logic_vector(31 downto 0);
+
+--signals mux 2 32
+signal a1 , b1 : std_logic_vector(31 downto 0);
+signal mux_re : std_logic_vector(31 downto 0);
+
 
 begin 
 programcounter : pc port map(pc_in=>pc_in1 , pc_out=>pc_out1 , rst=>reset2);
@@ -119,7 +128,7 @@ end if;
 
 end process;
 
-pc_in1<= pc_in1 + x"0001" ;
+--pc_in1<= pc_in1 + x"0001" ;
 
 instructionmem : instrmemory port map(read_addr=> read_addr1  ,instr=>instr1);
 read_addr1 <= pc_in1;
@@ -128,6 +137,7 @@ controll : controller port map(opcode=>opcode1 ,branch=>branch1 , memread=>memre
 opcode1<=instr1(31 downto 26) ;
 
 registerfile: regfile1 port map(rreg1=>rreg11 , rreg2=>rreg21 , wreg=> wreg1, regwrite1=>regwrite2 , writedatareg=> writedatareg1 , readdata1=> readdata11 , readdata2=> readdata21 , rst1=>reset2 , clk=>clock);
+--clock up
 rreg11<=instr1(25 downto 21) ;
 rreg12<=instr1(20 downto 16) ;
 
@@ -139,19 +149,23 @@ read20_16_1<= instr1(20 downto 16) ;
 end if;
 
 if(regwrite2='1' and regdst1='1')then
-writedatareg1<=read15_11_1;
+wreg1<=read15_11_1;
 elsif(regwrite2='1' and regdst1='0')then
-writedatareg1<=read20_16_1;
+wreg1<=read20_16_1;
 end if;
 
 signextend: signex port map(read15_0=> read15_0_1 , signext=> signext1);
 read15_0_1<=instr1(15 downto 0) ;
 
-aluContr: alu_ctl port map(aluop1=>aluop2 , inst5_0=>instr1(5 downto 0) , alu_ctr=>aluct_1,zero=> );
+aluContr: alu_ctl port map(aluop1=>aluop2 , inst5_0=>instr1(5 downto 0) , alu_ctr=>aluct_1 );
 
-mux231: mux31 port map(a=>signext1 , b=>readdata21 , ch=>aluarc1 , c=>re_mux1);
+mux132: mux32 port map(a=>readdata21 , b=>signext1 , ch=>aluarc1 , c=>re_mux1);
 
-alus: alu port map(readreg1=>readdata11 , re_mux=> re_mux1 , alu_ctr1=>aluct_1 , alu_res=>alu_res1);
+alus: alu port map(readreg1=>readdata11 , re_mux=> re_mux1 , alu_ctr1=>aluct_1 , alu_res=>alu_res1 , zero=>zero1);
+	
+datame : datamem port map(alu_rlt=>alu_res1 , readreg2=>readdata21 , memwrite1 => memwrite2 , memread1=> memread1 , readdata_d=> readdata_d1);
 
+mux232 : mux32 port map(a=>readdata_d1 , b=>alu_res1 , ch=>memtoregister1 , c=>mux_re);
+writedatareg1<=mux_re;	
 
 end dataflow;
