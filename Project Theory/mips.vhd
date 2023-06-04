@@ -75,6 +75,12 @@ memwrite1  : IN std_logic;
 readdata_d: out std_logic_vector(31 downto 0));
 end component;
 
+component addpc is 
+port(
+pc_cu : in std_logic_vector (31 downto 0);
+pc_ne: out std_logic_vector(31 downto 0));
+end component;
+
 --signals for pc
 signal pc_in1  , pc_out1 : std_logic_vector(31 downto 0);
 signal reset2 , clock : std_logic;
