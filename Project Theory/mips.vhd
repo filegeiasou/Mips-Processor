@@ -133,11 +133,7 @@ programcounter : pc port map(pc_in=>pc_in1 , pc_out=>pc_out1 , rst=>reset2);
 process(reset1,clk1)
 begin
 if(reset1='1') then 
-reset2<='1';
-elsif(clk1'event and clk1='1') then
---pc_in1<= pc_in1 + x"0001" ;
-clock<='1';
-end if;
+reset2<=reset1;
 
 end process;
 
@@ -180,5 +176,15 @@ datame : datamem port map(alu_rlt=>alu_res1 , readreg2=>readdata21 , memwrite1 =
 
 mux232 : mux32 port map(a=>alu_res1 , b=>readdata_d1 , ch=>memtoregister1 , c=>mux_re);
 writedatareg1<=mux_re;	
+
+signal pc_ne1,a2,pc_nxt:std_logic_vector(31 downto 0);
+signal chose :  std_logic;
+chose<=branch1 and zero1;
+addProgr: addpc port map(pc_cu=>pc_out1 , pc_ne=>pc_ne1);
+
+addsigne: addsign port map(pc_next1 => pc_ne1 , sign_extd=>signext1 , pc_next2 => a2);
+
+mux332 : mux32 port map(a=>pc_ne1 , b=>a2 , ch => chose , c=>pc_nxt);
+pc_in1 <= pc_ntx
 
 end dataflow;
