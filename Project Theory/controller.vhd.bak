@@ -1,0 +1,92 @@
+library ieee;
+use ieee.std_logic_1164.all;
+USE ieee.std_logic_unsigned.all;
+USE ieee.numeric_std.ALL;
+
+entity controller is
+	PORT (
+		opcode        : IN std_logic_vector(5 DOWNTO 0); 
+		regdst        : OUT std_logic;
+		branch        : OUT std_logic;
+		memread       : OUT std_logic;
+		memtoregister : OUT std_logic;
+		aluop         : OUT std_logic_vector(1 DOWNTO 0);
+		memwrite      : OUT std_logic;
+		alusrc        : OUT std_logic;
+		regwrite      : OUT std_logic;
+		rst2          : in std_logic);
+end controller;
+
+ARCHITECTURE Behavioral OF controller IS
+BEGIN
+	process (opcode,rst2)
+	BEGIN
+		if(rst2='1') then
+				regdst        <= '0';
+				branch        <= '0';
+				memread       <= '0';
+				memtoregister <= '0';
+				aluop         <= "00";
+				memwrite      <= '0';
+				alusrc        <= '0';
+				regwrite      <= '0';
+				regwrite      <= '0';
+		end if; 
+		case opcode IS
+			WHEN "000000" => -- and, or, add, sub, slt
+				regdst        <= '1';
+				branch        <= '0';
+				memread       <= '0';
+				memtoregister <= '0';
+				aluop         <= "10";
+				memwrite      <= '0';
+				alusrc        <= '0';
+				regwrite      <= '1' ;
+			WHEN "100011" => -- load word
+				regdst        <= '0';
+				branch        <= '0';
+				memread       <= '1';
+				memtoregister <= '1';
+				aluop         <= "00";
+				memwrite      <= '0';
+				alusrc        <= '1';
+				regwrite      <= '1' ;
+			WHEN "101011" => -- store word
+				regdst        <= 'X'; 
+				branch        <= '0';
+				memread       <= '0';
+				memtoregister <= 'X';
+				aluop         <= "00";
+				memwrite      <= '1';
+				alusrc        <= '1';
+				regwrite      <= '0';
+			WHEN "000101" => -- branch  not equal
+				regdst        <= 'X'; 
+				branch        <= '1' ;
+				memread       <= '0';
+				memtoregister <= 'X'; 
+				aluop         <= "11";
+				memwrite      <= '0';
+				alusrc        <= '0';
+				regwrite      <= '0';
+			WHEN "001000" =>
+				regdst        <= '0';
+				branch        <= '0';
+				memread       <= '0';
+				memtoregister <= '0';
+				aluop         <= "00";
+				memwrite      <= '0';
+				alusrc        <= '1';
+				regwrite      <= '1' ;
+			WHEN OTHERS => 
+				regdst        <= '0';
+				branch        <= '0';
+				memread       <= '0';
+				memtoregister <= '0';
+				aluop         <= "00";
+				memwrite      <= '0';
+				alusrc        <= '0';
+				regwrite      <= '0';
+		end case;
+	end process;
+end Behavioral;
