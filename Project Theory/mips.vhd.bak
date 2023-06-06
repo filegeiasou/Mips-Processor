@@ -1,0 +1,156 @@
+library ieee;
+use ieee.std_logic_1164.all;
+USE ieee.std_logic_unsigned.all;
+USE ieee.numeric_std.ALL;
+
+entity mips is
+port(clk1 : in std_logic ;
+reset1 : in std_logic);
+end mips;
+
+architecture dataflow of mips is
+component pc is port (pc_in : in std_logic_vector(31 downto 0);
+pc_out : out std_logic_vector (31 downto 0);
+rst : in std_logic;
+clk5 : in std_logic);
+end component;
+
+component instrmemory is port (read_addr: in std_logic_vector(31 downto 0);
+instr : out  std_logic_vector(31 downto 0));
+end component;
+
+component regfile1 is generic ( dw : natural := 32;
+adrw : natural := 5);
+port (rreg1: in std_logic_vector(adrw-1 downto 0);
+rreg2: in std_logic_vector(adrw-1 downto 0);
+wreg : in std_logic_vector(adrw-1 downto 0);
+regwrite1 ,rst1  , clk : in std_logic;
+writedatareg : in std_logic_vector(dw-1 downto 0);
+readdata1 : out std_logic_vector(dw-1 downto 0);
+readdata2: out std_logic_vector(dw-1 downto 0));
+end component;
+
+component controller is port (opcode : IN std_logic_vector(5 DOWNTO 0); 
+		regdst        : OUT std_logic;
+		branch        : OUT std_logic;
+		memread       : OUT std_logic;
+		memtoregister : OUT std_logic;
+		aluop         : OUT std_logic_vector(1 DOWNTO 0);
+		memwrite      : OUT std_logic;
+		alusrc        : OUT std_logic;
+		regwrite      : OUT std_logic;
+		rst2          : in std_logic);
+end component;
+
+component mux5 is port (read20_16, read15_11: in std_logic_vector(4 downto 0);
+regdst2: in std_logic;
+writereg: out std_logic_vector(4 downto 0));
+end component;
+
+component signex is port (read15_0: in std_logic_vector(15 downto 0);
+signext: out std_logic_vector(31 downto 0));
+end component;
+
+component mux32 is port(a, b: in std_logic_vector(31 downto 0);
+ch: in std_logic;
+c: out std_logic_vector(31 downto 0));
+end component;
+
+component alu is port (readreg1, re_mux: in std_logic_vector(31 downto 0);
+zero: out std_logic;
+alu_ctr1 : in std_logic_vector(3 downto 0);
+alu_res: out std_logic_vector(31 downto 0));
+end component;
+
+component alu_ctl is port (aluop1 : in std_logic_vector (1 downto 0);
+inst5_0 : in std_logic_vector (5 downto 0);
+alu_ctr : out std_logic_vector(3 downto 0));
+end component;
+
+component datamem is port
+(alu_rlt: in std_logic_vector(31 downto 0);
+readreg2: in std_logic_vector(31 downto 0);
+memread1   : IN std_logic;
+memwrite1  : IN std_logic;
+readdata_d: out std_logic_vector(31 downto 0);
+clk4 : in std_LOGIC );
+end component;
+
+component adder is 
+port(
+a , b : in std_logic_vector (31 downto 0);
+c: out std_logic_vector(31 downto 0));
+end component;
+	
+--signals for pc
+signal pc_in1  , pc_out1  : std_logic_vector(31 downto 0);
+
+--signals for instr_memo
+signal instr1 : std_logic_vector(31 downto 0);
+
+--signals for controller
+signal  branch1 , memread2 , memtoregister1 , memwrite2 , alusrc1 , regwrite2 , regdst1 :   std_logic;
+signal aluop2 : std_logic_vector(1 downto 0);
+
+--signals for register file
+signal wreg1 : std_logic_vector(4 downto 0);
+signal writedatareg1 , readdata21, readdata11 : std_logic_vector(31 downto 0);
+
+
+--signals for signex
+signal signext1: std_logic_vector(31 downto 0);
+
+--signals for alu control
+signal aluct_1: std_logic_vector(3 downto 0);
+
+--signals for alu
+signal alu_res1: std_logic_vector(31 downto 0);
+signal re_mux1: std_logic_vector (31 downto 0);
+signal zero1 :std_logic;
+
+--signals for data memory
+signal readdata_d1 : std_logic_vector(31 downto 0);
+
+--signals mux 2 32
+signal a1 , b1 : std_logic_vector(31 downto 0);
+signal mux_re : std_logic_vector(31 downto 0);
+
+--signals a
+signal pc_ne1,a2:std_logic_vector(31 downto 0);
+signal chose :  std_logic;
+
+begin 
+
+programcounter : pc port map(pc_in=>pc_in1 , pc_out=>pc_out1 , rst=>reset1 , clk5 => clk1);
+
+instructionmem : instrmemory port map(read_addr=> pc_out1  ,instr=>instr1);
+
+controll : controller port map(opcode=>instr1(31 downto 26) ,branch=>branch1 , memread=>memread2 , memtoregister=>memtoregister1 ,regdst=>regdst1, aluop=>aluop2 , memwrite=>memwrite2 , alusrc=>alusrc1 , regwrite=> regwrite2, rst2=>reset1 );
+
+registerfile: regfile1 port map(rreg1=>instr1(25 downto 21)  , rreg2=>instr1(20 downto 16) , wreg=> wreg1, regwrite1=>regwrite2 , writedatareg=> writedatareg1 , readdata1=> readdata11 , readdata2=> readdata21 , rst1=>reset2 , clk=>clk1);
+
+
+mux2t01 : mux5 port map(read20_16=>instr1(20 downto 16) , read15_11=>instr1(15 downto 11), regdst2=> regdst1 , writereg=>wreg1);
+
+
+signextend: signex port map(read15_0=> instr1(15 downto 0) , signext=> signext1);
+
+aluContr: alu_ctl port map(aluop1=>aluop2 , inst5_0=>instr1(5 downto 0) , alu_ctr=>aluct_1 );
+
+mux132: mux32 port map(a=>readdata21 , b=>signext1 , ch=>alusrc1 , c=>re_mux1);
+
+alus: alu port map(readreg1=>readdata11 , re_mux=> re_mux1 , alu_ctr1=>aluct_1 , alu_res=>alu_res1 , zero=>zero1);
+	
+datame : datamem port map(alu_rlt=>alu_res1 , readreg2=>readdata21 , memwrite1 => memwrite2 , memread1=> memread2 , readdata_d=> readdata_d1 , clk4 => clk1);
+
+mux232 : mux32 port map(a=>alu_res1 , b=>readdata_d1 , ch=>memtoregister1 , c=>mux_re);
+writedatareg1<=mux_re;	
+
+chose<=branch1 and zero1;
+adder1 : adder port map(a=>pc_out1 , b=>x"00000001" , c=> pc_ne1);
+
+adder2 : adder port map(a=> pc_ne1 , b=> signext1 , c=> a2);
+
+mux332 : mux32 port map(a=>pc_ne1 , b=>a2 , ch => chose , c=>pc_in1);
+
+end dataflow;
